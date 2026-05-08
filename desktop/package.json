@@ -1,6 +1,6 @@
 {
   "name": "litho-agent-desktop",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Semiconductor process engineering calculator — lithography, oxidation, implantation, yield",
   "main": "src/main.js",
   "scripts": {
