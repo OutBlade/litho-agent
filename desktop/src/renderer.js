@@ -1054,7 +1054,26 @@ function onSelect(id, fn) {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('ver').textContent = window.app?.version ?? '2.0.0'
+  document.getElementById('ver').textContent = window.app?.version ?? '1.0.3'
+
+  // ── Auto-update toast ────────────────────────────────────────────────────
+  const toast   = document.getElementById('update-toast')
+  const verLbl  = document.getElementById('update-ver-label')
+  const nowBtn  = document.getElementById('update-now-btn')
+  const dimBtn  = document.getElementById('update-dismiss-btn')
+
+  window.app?.onUpdateDownloaded?.(({ version }) => {
+    verLbl.textContent = `v${version} will install in 8 s`
+    toast.classList.remove('hidden')
+  })
+
+  nowBtn?.addEventListener('click', () => {
+    window.app?.installUpdate?.()
+  })
+
+  dimBtn?.addEventListener('click', () => {
+    toast.classList.add('hidden')
+  })
 
   // Build all charts
   buildOpticsChart()

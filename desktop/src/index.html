@@ -103,9 +103,21 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="version-badge">v<span id="ver">2.0.0</span></div>
+      <div class="version-badge">v<span id="ver">1.0.3</span></div>
     </div>
   </aside>
+
+  <!-- Update toast — shown when electron-updater has downloaded a new version -->
+  <div id="update-toast" class="update-toast hidden">
+    <div class="update-toast-text">
+      <span class="update-toast-title">Update ready</span>
+      <span class="update-toast-sub" id="update-ver-label"></span>
+    </div>
+    <div class="update-toast-actions">
+      <button id="update-now-btn" class="update-btn-primary">Install now</button>
+      <button id="update-dismiss-btn" class="update-btn-dismiss">Later</button>
+    </div>
+  </div>
 
   <!-- Main content -->
   <main class="content">
