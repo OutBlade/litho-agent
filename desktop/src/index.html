@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LithoAgent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">LA</div>
+      <div>
+        <div class="brand-name">LithoAgent</div>
+        <div class="brand-sub">Process Engineering</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">Modules</div>
+
+      <button class="nav-item active" data-panel="litho">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="3"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41"/>
+        </svg>
+        <span>Lithography</span>
+      </button>
+
+      <button class="nav-item" data-panel="oxid">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 2C6 5 3 6.5 3 9.5a5 5 0 0010 0C13 6.5 10 5 8 2z"/>
+        </svg>
+        <span>Oxidation</span>
+      </button>
+
+      <button class="nav-item" data-panel="impl">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 8h9M8 4l4 4-4 4"/>
+          <circle cx="13" cy="8" r="1.5"/>
+        </svg>
+        <span>Implantation</span>
+      </button>
+
+      <button class="nav-item" data-panel="yield">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 12l3.5-4 3 2.5L12 5l2 2"/>
+          <path d="M2 14h12"/>
+        </svg>
+        <span>Yield</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version-badge">v<span id="ver">1.0.0</span></div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="content">
+
+    <!-- ── Lithography ── -->
+    <div id="panel-litho" class="panel active">
+      <div class="panel-header">
+        <h1>Optical Lithography</h1>
+        <p>Rayleigh resolution, depth of focus, and EUV vs DUV comparison</p>
+      </div>
+      <div class="panel-body">
+        <div class="panel-grid">
+
+          <div class="controls-col">
+            <div class="card">
+              <div class="card-title">Parameters</div>
+
+              <div class="form-group">
+                <label>Wavelength</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="wl" value="193" checked> DUV ArF — 193 nm</label>
+                  <label class="radio-label"><input type="radio" name="wl" value="13.5"> EUV — 13.5 nm</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Numerical aperture (NA) <span class="value-badge" id="na-val">0.33</span></label>
+                <input type="range" id="na-slider" min="0.10" max="1.35" step="0.01" value="0.33">
+              </div>
+
+              <div class="form-group">
+                <label>k1 factor <span class="value-badge" id="k1-val">0.28</span></label>
+                <input type="range" id="k1-slider" min="0.25" max="0.60" step="0.01" value="0.28">
+              </div>
+
+              <div class="form-group">
+                <label>k2 factor <span class="value-badge" id="k2-val">0.50</span></label>
+                <input type="range" id="k2-slider" min="0.30" max="0.80" step="0.01" value="0.50">
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Results at current NA</div>
+              <div class="metric-row">
+                <span class="metric-label">Resolution</span>
+                <span class="metric-value" id="res-val">—</span>
+                <span class="metric-unit">nm</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Depth of focus</span>
+                <span class="metric-value" id="dof-val">—</span>
+                <span class="metric-unit">nm</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">CD shift / 1% dose</span>
+                <span class="metric-value" id="cdd-val">—</span>
+                <span class="metric-unit">nm</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">EUV vs DUV at current resolution</div>
+              <table class="compare-table">
+                <thead>
+                  <tr><th></th><th>EUV</th><th>DUV</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Wavelength</td><td class="val-euv">13.5 nm</td><td class="val-duv">193 nm</td></tr>
+                  <tr><td>NA</td><td class="val-euv" id="cmp-euv-na">—</td><td class="val-duv">1.35</td></tr>
+                  <tr><td>DOF</td><td class="val-euv" id="cmp-euv-dof">—</td><td class="val-duv" id="cmp-duv-dof">—</td></tr>
+                  <tr><td>Passes</td><td class="val-euv">1</td><td class="val-duv" id="cmp-duv-passes">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="chart-col">
+            <div class="card chart-card">
+              <div class="card-title">Resolution &amp; DOF vs NA</div>
+              <div class="chart-wrap">
+                <canvas id="litho-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Oxidation ── -->
+    <div id="panel-oxid" class="panel">
+      <div class="panel-header">
+        <h1>Thermal Oxidation</h1>
+        <p>Deal-Grove model (B.E. Deal &amp; A.S. Grove, J. Appl. Phys. 36, 1965)</p>
+      </div>
+      <div class="panel-body">
+        <div class="panel-grid">
+
+          <div class="controls-col">
+            <div class="card">
+              <div class="card-title">Parameters</div>
+
+              <div class="form-group">
+                <label>Temperature <span class="value-badge" id="ox-temp-val">1000</span> °C</label>
+                <input type="range" id="ox-temp" min="800" max="1200" step="10" value="1000">
+              </div>
+
+              <div class="form-group">
+                <label>Time <span class="value-badge" id="ox-time-val">60</span> min</label>
+                <input type="range" id="ox-time" min="1" max="480" step="1" value="60">
+              </div>
+
+              <div class="form-group">
+                <label>Ambient</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="ambient" value="dry" checked> Dry O2</label>
+                  <label class="radio-label"><input type="radio" name="ambient" value="wet"> Wet H2O</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Orientation</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="orient" value="100" checked> Si(100)</label>
+                  <label class="radio-label"><input type="radio" name="orient" value="111"> Si(111)</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Results</div>
+              <div class="metric-row">
+                <span class="metric-label">Thickness</span>
+                <span class="metric-value" id="ox-thick">—</span>
+                <span class="metric-unit">nm</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Regime</span>
+                <span class="metric-value" id="ox-regime" style="font-size:12px">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Linear rate B/A</span>
+                <span class="metric-value" id="ox-ba">—</span>
+                <span class="metric-unit">nm/hr</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Parabolic rate B</span>
+                <span class="metric-value" id="ox-b">—</span>
+                <span class="metric-unit">nm²/hr</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-col">
+            <div class="card chart-card">
+              <div class="card-title">Oxide thickness vs time — 800 to 1200 °C</div>
+              <div class="chart-wrap">
+                <canvas id="oxid-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Implantation ── -->
+    <div id="panel-impl" class="panel">
+      <div class="panel-header">
+        <h1>Ion Implantation</h1>
+        <p>Gaussian concentration profiles — range data from SRIM / Jaeger Table 3.1</p>
+      </div>
+      <div class="panel-body">
+        <div class="panel-grid">
+
+          <div class="controls-col">
+            <div class="card">
+              <div class="card-title">Parameters</div>
+
+              <div class="form-group">
+                <label>Species</label>
+                <select id="impl-species" class="select-input">
+                  <option value="boron">Boron (B)</option>
+                  <option value="phosphorus">Phosphorus (P)</option>
+                  <option value="arsenic">Arsenic (As)</option>
+                  <option value="bf2">BF2+</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Energy <span class="value-badge" id="impl-e-val">80</span> keV</label>
+                <input type="range" id="impl-energy" min="20" max="200" step="5" value="80">
+              </div>
+
+              <div class="form-group">
+                <label>Dose 10^ <span class="value-badge" id="impl-d-val">14.0</span> cm⁻²</label>
+                <input type="range" id="impl-dose" min="11" max="16" step="0.5" value="14">
+              </div>
+
+              <div class="form-group">
+                <label>Background 10^ <span class="value-badge" id="impl-bg-val">17.0</span> cm⁻³</label>
+                <input type="range" id="impl-bg" min="14" max="18" step="0.5" value="17">
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Results</div>
+              <div class="metric-row">
+                <span class="metric-label">Range Rp</span>
+                <span class="metric-value" id="impl-rp">—</span>
+                <span class="metric-unit">nm</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Straggle dRp</span>
+                <span class="metric-value" id="impl-drp">—</span>
+                <span class="metric-unit">nm</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Peak concentration</span>
+                <span class="metric-value" id="impl-peak">—</span>
+                <span class="metric-unit">cm⁻³</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Junction depth xj</span>
+                <span class="metric-value" id="impl-xj">—</span>
+                <span class="metric-unit">nm</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-col">
+            <div class="card chart-card">
+              <div class="card-title">Concentration profile (log scale)</div>
+              <div class="chart-wrap">
+                <canvas id="impl-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Yield ── -->
+    <div id="panel-yield" class="panel">
+      <div class="panel-header">
+        <h1>Yield Engineering</h1>
+        <p>Murphy and Poisson models, dies per wafer, process economics</p>
+      </div>
+      <div class="panel-body">
+        <div class="panel-grid">
+
+          <div class="controls-col">
+            <div class="card">
+              <div class="card-title">Parameters</div>
+
+              <div class="form-group">
+                <label>Defect density D0 <span class="value-badge" id="d0-val">0.50</span> cm⁻²</label>
+                <input type="range" id="d0-slider" min="0.01" max="5" step="0.01" value="0.5">
+              </div>
+
+              <div class="form-group">
+                <label>Die width <span class="value-badge" id="dw-val">10.0</span> mm</label>
+                <input type="range" id="dw-slider" min="2" max="25" step="0.5" value="10">
+              </div>
+
+              <div class="form-group">
+                <label>Die height <span class="value-badge" id="dh-val">10.0</span> mm</label>
+                <input type="range" id="dh-slider" min="2" max="25" step="0.5" value="10">
+              </div>
+
+              <div class="form-group">
+                <label>Wafer diameter</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="wafer" value="200"> 200 mm</label>
+                  <label class="radio-label"><input type="radio" name="wafer" value="300" checked> 300 mm</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Results</div>
+              <div class="metric-row">
+                <span class="metric-label">Murphy yield</span>
+                <span class="metric-value" id="y-murphy">—</span>
+                <span class="metric-unit">%</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Poisson yield</span>
+                <span class="metric-value" id="y-poisson">—</span>
+                <span class="metric-unit">%</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Dies per wafer</span>
+                <span class="metric-value" id="y-dpw">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Good dies / wafer</span>
+                <span class="metric-value" id="y-gdw">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-col">
+            <div class="card chart-card">
+              <div class="card-title">Yield vs defect density</div>
+              <div class="chart-wrap">
+                <canvas id="yield-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../node_modules/chart.js/dist/chart.umd.min.js"></script>
+<script src="renderer.js"></script>
+</body>
+</html>

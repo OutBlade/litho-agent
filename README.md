@@ -1,103 +1,120 @@
 # LithoAgent
 
-AI-powered semiconductor process engineering assistant. Ask questions in plain language; get precise answers backed by physical models.
+**Semiconductor process engineering assistant — AI-powered web agent and Windows desktop calculator.**
 
-Built on the same architectural pattern as [vercel-labs/open-agents](https://github.com/vercel-labs/open-agents): a chat web UI drives a Claude agent that dispatches to a tool sandbox. Here the sandbox is a set of validated Python process models instead of a VM with a shell.
+[![Download for Windows](https://img.shields.io/badge/Download%20for%20Windows-Installer-5b8df7?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/OutBlade/litho-agent/releases/latest)
+[![CI](https://github.com/OutBlade/litho-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/OutBlade/litho-agent/actions/workflows/ci.yml)
+[![Release](https://github.com/OutBlade/litho-agent/actions/workflows/release.yml/badge.svg)](https://github.com/OutBlade/litho-agent/actions/workflows/release.yml)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+
+---
+
+LithoAgent ships as two complementary tools built on the same physical models. The **desktop app** is a standalone Windows calculator — four interactive panels with real-time charts, no internet connection or API key required. The **web agent** wraps the same calculations behind a Claude-powered chat interface: ask a question in plain language, get a precise answer backed by the physics.
+
+Both tools target the domain that matters to semiconductor manufacturing: optical lithography resolution limits, thermal oxidation kinetics, ion implantation profiles, and fab yield economics.
+
+---
+
+## Desktop App — Windows
+
+Four modules, all updating in real time as you drag sliders.
+
+| Module | What it shows |
+|---|---|
+| Lithography | Rayleigh resolution and DOF curves vs NA, live EUV vs DUV comparison table |
+| Oxidation | Deal-Grove thickness vs time, full 800–1200 °C family of curves, regime indicator |
+| Implantation | Gaussian concentration profile on a log-scale chart, junction depth, sheet resistance |
+| Yield | Murphy and Poisson yield vs D0, dies per wafer, good dies per wafer |
 
 ```
-Streamlit UI  →  Agent (Claude tool-use loop)  →  Process tool sandbox
+cd desktop
+npm install
+npm start
+```
+
+Build a signed NSIS installer:
+
+```
+npm run build
 ```
 
 ---
 
-## What it can calculate
+## Web Agent — Python
 
-**Lithography**
-- Rayleigh resolution and depth of focus for any wavelength / NA combination
-- EUV (13.5 nm) vs DUV ArF immersion (193 nm) comparison — required k1, DOF, multi-patterning steps
-- CD sensitivity to dose and focus variation
-- Overlay budget breakdown for multi-layer stacks
+Claude-backed tool-use agent. Ask process questions in plain language; the agent selects the right model, runs the calculation, and explains the physics.
 
-**Thermal oxidation (Deal-Grove)**
-- Oxide thickness for given time, temperature, orientation, and ambient (dry/wet)
-- Time required to reach a target thickness
-- Temperature sensitivity — how thermal budget scales with process temperature
-
-**Ion implantation**
-- Gaussian concentration profiles for B, P, As, BF2 at arbitrary dose and energy
-- Metallurgical junction depth vs background doping
-- Sheet resistance estimate from dose and species mobility
-
-**Yield engineering**
-- Poisson and Murphy yield models
-- Dies per wafer (standard area formula)
-- Cost per good die incorporating yield, wafer cost, and tool cost
-- Process capability (Cp, Cpk) and Shewhart SPC control limits
-
----
-
-## Quick start
-
-```bash
-git clone https://github.com/OutBlade/litho-agent
-cd litho-agent
+```
 pip install -r requirements.txt
 export ANTHROPIC_API_KEY=sk-ant-...
 streamlit run app.py
 ```
 
-The sidebar provides standalone interactive plots (resolution vs NA, implant profiles) that work without an API key.
+The sidebar runs standalone (resolution vs NA curve, implant profile) without an API key.
+
+Example questions:
+
+- *What resolution can EUV reach at NA = 0.33?*
+- *How long does it take to grow 8 nm of dry SiO2 at 900 °C on Si(100)?*
+- *Compare EUV and DUV ArF immersion for a 7 nm half-pitch target.*
+- *Junction depth for boron at 1×10¹⁴ cm⁻², 80 keV, into a 10¹⁷ cm⁻³ p-well?*
+- *Murphy yield for D0 = 0.5 cm⁻² and a 100 mm² die on a 300 mm wafer?*
 
 ---
 
-## Running tests
+## Tests
 
-```bash
+```
 pytest tests/ -v
 ```
 
-All tests are purely computational — no API key required.
+Sixteen unit tests covering all four tool modules. No API key required.
 
 ---
 
-## Example questions
-
-- *What resolution can EUV achieve at NA = 0.33?*
-- *How long does it take to grow 8 nm of gate oxide at 900°C in dry O2 on Si(100)?*
-- *Compare EUV and DUV for a 7 nm half-pitch target.*
-- *What is the junction depth for a boron implant at 1e14 cm-2, 80 keV into p-well doping of 1e17 cm-3?*
-- *If defect density is 0.5 cm-2 and die area is 200 mm2, what is the Murphy yield?*
-- *Given these 20 overlay measurements, is the process in spec at ±3 nm?*
-
----
-
-## Project structure
+## Project Structure
 
 ```
 litho-agent/
 ├── agent/
-│   ├── core.py              # Claude tool-use loop — the agent layer
+│   ├── core.py              Claude tool-use loop
 │   └── tools/
-│       ├── lithography.py   # Rayleigh, DOF, EUV vs DUV, overlay
-│       ├── oxidation.py     # Deal-Grove model (dry + wet, 100/111)
-│       ├── implantation.py  # Gaussian profiles, junction depth, Rs
-│       └── yield_model.py   # Poisson, Murphy, SPC, Cpk, economics
+│       ├── lithography.py   Rayleigh, DOF, EUV vs DUV, overlay budget
+│       ├── oxidation.py     Deal-Grove model — dry + wet, Si(100) + Si(111)
+│       ├── implantation.py  Gaussian profiles, junction depth, sheet resistance
+│       └── yield_model.py   Poisson, Murphy, SPC, Cpk, fab economics
+├── desktop/
+│   ├── package.json         Electron + electron-builder config
+│   ├── build/icon.ico       BLADE logo installer icon
+│   └── src/
+│       ├── main.js          Electron main process + auto-updater
+│       ├── preload.js       Context bridge
+│       ├── index.html       App shell — four panel layout
+│       ├── renderer.js      All physics calculations + Chart.js charts
+│       └── styles.css       Dark theme
 ├── tests/
-│   └── test_tools.py        # 16 unit tests, no API key required
-├── app.py                   # Streamlit chat UI + sidebar calculators
+│   └── test_tools.py        16 unit tests
+├── app.py                   Streamlit chat interface
 └── requirements.txt
 ```
 
 ---
 
-## Model sources
+## Physics References
 
 | Model | Reference |
 |---|---|
-| Oxidation | B.E. Deal & A.S. Grove, *J. Appl. Phys.* 36, 3770 (1965) |
-| Implantation ranges | Ziegler SRIM-2013 / Jaeger Table 3.1 |
-| Rayleigh / DOF | Born & Wolf *Principles of Optics*; ASML NXE specs |
-| Murphy yield | W.J. Murphy, *Proc. IEEE* 52, 1537 (1964) |
-| SPC / Cpk | Montgomery *Introduction to Statistical Quality Control* |
+| Rayleigh resolution / DOF | Born & Wolf, *Principles of Optics*; ASML NXE product specs |
+| Thermal oxidation | B.E. Deal & A.S. Grove, *J. Appl. Phys.* 36, 3770 (1965) |
+| Ion implantation ranges | Ziegler, SRIM-2013; Jaeger, *Introduction to Microelectronic Fabrication*, Table 3.1 |
+| Yield — Murphy | W.J. Murphy, *Proc. IEEE* 52, 1537 (1964) |
+| Yield — Poisson | Standard Poisson defect distribution model |
+| SPC / Cpk | Montgomery, *Introduction to Statistical Quality Control* |
 
-Models are intentionally simplified relative to production TCAD tools (Sentaurus, Athena). They reproduce textbook results and are suitable for first-order process planning and education.
+Models reproduce textbook results and are suitable for first-order process planning and education. They are intentionally simplified relative to production TCAD tools (Sentaurus, Athena).
+
+---
+
+## License
+
+MIT
